@@ -116,5 +116,3 @@ uvicorn==0.37.0
 websockets==15.0.1
 win32_setctime==1.2.0
 yarl==1.22.0
- hints & utilities
-typing_extensions==4.15.0
