@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtualenv
+venv/
+ENV/
+env/
+.venv/
+.env/
+.env
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# dotenv
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Supabase
+.supabase/
+
+# Log
+*.log
+
+# Test
+.pytest_cache/
+
+# Others
+*.sqlite3
+SQL/
+tests/
