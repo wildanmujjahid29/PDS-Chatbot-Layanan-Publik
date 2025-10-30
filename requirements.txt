@@ -16,7 +16,9 @@ bcrypt==4.0.1
 passlib==1.7.4
 
 # AI & Embeddings
-chonkie==1.4.0
+# AI & Embeddings
+chonkie[model2vec]==1.4.0
+model2vec==0.7.0
 numpy==2.3.4
 
 # Google Gemini LLM (compatible versions)
