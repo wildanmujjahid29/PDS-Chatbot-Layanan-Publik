@@ -54,8 +54,8 @@ def join_service_content_with_labels(service) -> str:
 def preprocess_text(text: str) -> str:
     # Lowercase
     text = text.lower()
-    # Hilangkan karakter non-alfanumerik kecuali beberapa tanda baca
-    text = re.sub(r"[^a-z0-9,.:;()\-\n| ]+", "", text)
+    # Hilangkan karakter non-alfanumerik kecuali spasi dan beberapa tanda baca
+    text = re.sub(r"[^a-z0-9,.:;()\-\n| \s]+", "", text)
     # Hilangkan spasi berlebih
     text = re.sub(r"\s+", " ", text)
     # Strip di ujung

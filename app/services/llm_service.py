@@ -13,7 +13,8 @@ load_dotenv()
 
 def get_configured_model():
     """
-    Get Gemini model with API key from AI config or fallback to env.
+    Get Gemini model dengan API key dari database (prioritas) atau env fallback.
+    Returns model yang sudah dikonfigurasi dengan API key.
     """
     # Try to get API key from database config first
     api_key = get_active_gemini_key()
@@ -27,6 +28,19 @@ def get_configured_model():
     
     # Initialize and return Gemini model
     return genai.GenerativeModel('gemini-2.0-flash-exp')
+
+
+def get_generation_config() -> Dict[str, Any]:
+    """
+    Get generation config (temperature, max_tokens) dari database.
+    Returns dict dengan parameter generation.
+    """
+    configs = get_all_configs()
+    
+    return {
+        "temperature": float(configs.get("temperature", 0.7)),
+        "max_output_tokens": int(configs.get("max_tokens", 1024))
+    }
 
 
 def build_prompt(user_query: str, search_results: List[Dict[str, Any]]) -> str:
@@ -79,7 +93,7 @@ JAWABAN:
 
 def generate_response(user_query: str, search_results: List[Dict[str, Any]]) -> str:
     """
-    Generate response menggunakan Gemini berdasarkan search results.
+    Generate response menggunakan Gemini dengan config dari database.
     
     Args:
         user_query: Pertanyaan user
@@ -92,11 +106,17 @@ def generate_response(user_query: str, search_results: List[Dict[str, Any]]) -> 
         # Get configured model with API key from database
         model = get_configured_model()
         
+        # Get generation config from database
+        gen_config = get_generation_config()
+        
         # Build prompt
         prompt = build_prompt(user_query, search_results)
         
-        # Generate response dengan Gemini
-        response = model.generate_content(prompt)
+        # Generate response dengan Gemini menggunakan config dari database
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(**gen_config)
+        )
         
         return response.text
         
@@ -109,17 +129,6 @@ def build_prompt_with_history(
     search_results: List[Dict[str, Any]],
     conversation_context: str = ""
 ) -> str:
-    """
-    Build prompt dengan conversation history untuk continuity.
-    
-    Args:
-        user_query: Current user question
-        search_results: Search results from RAG
-        conversation_context: Previous conversation formatted string
-        
-    Returns:
-        Complete prompt dengan history
-    """
     # Jika tidak ada hasil search
     if not search_results:
         base_prompt = f"""
@@ -188,12 +197,12 @@ def generate_response_with_history(
     conversation_context: str = ""
 ) -> str:
     """
-    Generate response dengan conversation history context.
+    Generate response dengan conversation history menggunakan config dari database.
     
     Args:
         user_query: Pertanyaan user
         search_results: Hasil search dari RAG
-        conversation_context: Previous conversation context
+        conversation_context: Previous conversation formatted string
         
     Returns:
         Response string dari Gemini
@@ -202,11 +211,17 @@ def generate_response_with_history(
         # Get configured model
         model = get_configured_model()
         
+        # Get generation config from database
+        gen_config = get_generation_config()
+        
         # Build prompt dengan history
         prompt = build_prompt_with_history(user_query, search_results, conversation_context)
         
-        # Generate response
-        response = model.generate_content(prompt)
+        # Generate response dengan config dari database
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(**gen_config)
+        )
         
         return response.text
         
@@ -220,18 +235,6 @@ def chat_with_rag(
     temperature: float = 0.7,
     max_tokens: int = 1024
 ) -> Dict[str, Any]:
-    """
-    Complete chatbot flow: RAG + LLM generation (tanpa history).
-    
-    Args:
-        user_query: User's question
-        search_results: Search results from RAG service
-        temperature: Response creativity (0-1)
-        max_tokens: Maximum response length
-        
-    Returns:
-        Dictionary with query, response, and metadata
-    """
     # Generate response
     response = generate_response(user_query, search_results)
     
@@ -255,17 +258,7 @@ def chat_with_rag_and_history(
     search_results: List[Dict[str, Any]],
     conversation_context: str = ""
 ) -> Dict[str, Any]:
-    """
-    Complete chatbot flow dengan conversation history untuk user chat.
-    
-    Args:
-        user_query: User's question
-        search_results: Search results from RAG service
-        conversation_context: Previous conversation formatted string
-        
-    Returns:
-        Dictionary with query and response (simple format untuk user)
-    """
+
     # Generate response dengan history
     response = generate_response_with_history(user_query, search_results, conversation_context)
     

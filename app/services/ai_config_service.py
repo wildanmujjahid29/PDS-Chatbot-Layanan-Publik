@@ -70,9 +70,20 @@ def get_active_gemini_key() -> str:
 
 
 def get_active_rag_params() -> Dict[str, Any]:
+    """Get active RAG parameters dari database."""
     configs = get_all_configs()
     
     return {
         "top_k": int(configs.get("top_k", 5)),
         "min_similarity": float(configs.get("min_similarity", 0.5))
+    }
+
+
+def get_active_llm_params() -> Dict[str, Any]:
+    """Get active LLM generation parameters dari database."""
+    configs = get_all_configs()
+    
+    return {
+        "temperature": float(configs.get("temperature", 0.7)),
+        "max_tokens": int(configs.get("max_tokens", 1024))
     }
